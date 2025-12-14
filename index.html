@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChatAI – Trợ lý học tập</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  background: #f7f7f8;
+}
+
+.header {
+  background: #ffffff;
+  border-bottom: 1px solid #ddd;
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.chat {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+  height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+.msg {
+  max-width: 75%;
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.user {
+  background: #dbeafe;
+  margin-left: auto;
+}
+
+.bot {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.typing {
+  font-style: italic;
+  color: gray;
+}
+
+.input-area {
+  display: flex;
+  gap: 10px;
+  padding: 15px;
+  border-top: 1px solid #ddd;
+  background: white;
+}
+
+input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+button {
+  padding: 10px 14px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.send { background: #2563eb; color: white; }
+.mic { background: #10b981; color: white; }
+.speak { background: #f59e0b; color: white; }
+</style>
+</head>
+
+<body>
+
+<div class="header">🤖 ChatAI – Trợ lý học tập</div>
+
+<div class="chat" id="chat">
+  <div class="msg bot">
+    Xin chào! Mình là ChatAI. Bạn có thể gõ hoặc nói câu hỏi nhé.
+  </div>
+</div>
+
+<div class="input-area">
+  <input id="input" placeholder="Nhập câu hỏi..." onkeydown="if(event.key==='Enter') send()">
+  <button class="send" onclick="send()">➤</button>
+  <button class="mic" onclick="listen()">🎙</button>
+  <button class="speak" onclick="speakLast()">🔊</button>
+</div>
+
+<script>
+const chat = document.getElementById("chat");
+let lastBotText = "";
+
+function add(text, cls) {
+  const div = document.createElement("div");
+  div.className = "msg " + cls;
+  div.innerText = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function send() {
+  const input = document.getElementById("input");
+  const text = input.value.trim();
+  if (!text) return;
+  add(text, "user");
+  input.value = "";
+
+  const typing = document.createElement("div");
+  typing.className = "msg bot typing";
+  typing.innerText = "ChatAI đang trả lời...";
+  chat.appendChild(typing);
+
+  setTimeout(() => {
+    typing.remove();
+    const reply = generateReply(text);
+    lastBotText = reply;
+    add(reply, "bot");
+  }, 900);
+}
+
+function generateReply(q) {
+  q = q.toLowerCase();
+  if (q.includes("tin học"))
+    return "Tin học là môn học về máy tính, dữ liệu và công nghệ thông tin.";
+  if (q.includes("python"))
+    return "Python là ngôn ngữ lập trình dễ học, thường dùng trong AI và khoa học dữ liệu.";
+  if (q.includes("chào"))
+    return "Chào bạn! Mình có thể giúp bạn học tập nhé.";
+  return "Câu hỏi hay đó! Bạn có thể hỏi chi tiết hơn không?";
+}
+
+function listen() {
+  const r = new webkitSpeechRecognition();
+  r.lang = "vi-VN";
+  r.onresult = e => {
+    document.getElementById("input").value = e.results[0][0].transcript;
+    send();
+  };
+  r.start();
+}
+
+function speakLast() {
+  if (!lastBotText) return;
+  const u = new SpeechSynthesisUtterance(lastBotText);
+  u.lang = "vi-VN";
+  u.rate = 1.05;
+  speechSynthesis.speak(u);
+}
+</script>
+
+</body>
+</html>
